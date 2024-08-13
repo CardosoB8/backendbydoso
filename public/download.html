@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<<<<<<< HEAD
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mozencurtabydoso</title>
+    <style>
+        /* Mesmo estilo que antes */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 300px;
+        }
+        h1 {
+            font-size: 24px;
+            color: #333;
+        }
+        p {
+            font-size: 16px;
+            color: #666;
+        }
+        .download-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #17a2b8;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+        }
+        .download-button:hover {
+            background-color: #138496;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Seu download está pronto</h1>
+        <p>Clique no botão abaixo para baixar o arquivo.</p>
+        <a class="download-button" href="#" id="downloadLink">Baixar Agora</a>
+    </div>
+    <script>
+        async function fetchDownloadLink() {
+            const linkId = new URLSearchParams(window.location.search).get('linkId');
+            try {
+                const response = await fetch(`/api/download/${linkId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('downloadLink').href = data.downloadUrl;
+                } else {
+                    alert('Erro ao obter o link de download');
+                }
+            } catch (error) {
+                console.error('Erro ao buscar o link de download:', error);
+                alert('Ocorreu um erro ao obter o link de download.');
+            }
+        }
+
+        fetchDownloadLink();
+    </script>
+</body>
+</html>
+=======
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-adsense-account" content="ca-pub-6411684716871403">
+    <title>mozencurta</title>
+    <style>
+        body {
+            margin: -20px 20px -20px 20px;
+            padding: 10px 50px 10px 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #1a1a2e;
+            color: #fff;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: -webkit-linear-gradient(45deg, #ff6ec4, #7873f5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            font-size: 1.25rem;
+            margin-bottom: 10px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .title {
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            color: #ff6ec4;
+            margin-bottom: 10px;
+        }
+
+        .countdown-container {
+            text-align: center;
+            background-color: #2e2e48;
+            padding: 20px 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .countdown-container:hover {
+            transform: scale(1.05);
+        }
+
+        button {
+            background-color: #7873f5;
+            color: #fff;
+            border: none;
+            padding: 15px 25px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #7873f5;
+        }
+
+        .social-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+        }
+
+        .social-button {
+            background-color: #2e2e48;
+            padding: 10px 20px;
+            border-radius: 5px;
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .social-button:hover {
+            background-color: #7873f5;
+        }
+
+        .social-button.youtube {
+            background-color: #ff0000;
+        }
+
+        .social-button.youtube:hover {
+            background-color: #cc0000;
+        }
+
+        .social-button.whatsapp {
+            background-color: #25d366;
+        }
+
+        .social-button.whatsapp:hover {
+            background-color: #1da851;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        body {
+            animation: fadeIn 1s ease-in-out;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="title">Encurtador feito por doso</div>
+    </div>
+
+    <div class="countdown-container">
+        <h1>Link verificado com sucesso</h1>
+        <p>Agora pode acessar o conteudo do link</p>
+        <button onclick="redirectToOriginal()">Acessar Conteúdo</button>
+    </div>
+
+    <div class="social-buttons">
+        <a href="https://youtube.com/@sketchwarepromoz?si=TspY1aRptoBJ3woS" target="_blank" class="social-button youtube">YouTube</a>
+        <a href="https://wa.me/+258865446574?text= kmk doso" target="_blank" class="social-button whatsapp">WhatsApp</a>
+    </div>
+
+    <script>
+        function redirectToOriginal() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlId = urlParams.get('id');
+
+            fetch(`/getOriginalUrl?id=${urlId}`)
+                .then(response => response.json())
+                .then(data => {
+                    window.location.href = data.originalUrl;
+                });
+        }
+    </script>
+</body>
+
+</html>
+>>>>>>> c569ffd (Initial commit)

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>encurtadorbydoso</title>
+    <style>
+    body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 300px;
+        }
+        h1 {
+            font-size: 24px;
+            color: #333;
+        }
+        p {
+            font-size: 16px;
+            color: #666;
+        }
+        .verify-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .verify-button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Verificação de Link</h1>
+        <p>Clique no botão abaixo para verificar o link.</p>
+        <button class="verify-button" onclick="verifyLink()">Verificar</button>
+    </div>
+
+    <script>
+        async function verifyLink() {
+            const linkId = new URLSearchParams(window.location.search).get('linkId');
+            try {
+                const response = await fetch(`/api/verify/${linkId}`);
+                if (response.ok) {
+                    window.location.href = 'countdown.html';
+                } else {
+                    alert('Link inválido');
+                }
+            } catch (error) {
+                console.error('Erro na verificação:', error);
+                alert('Ocorreu um erro ao verificar o link.');
+            }
+        }
+    </script>
+</body>
+</html>
