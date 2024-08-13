@@ -110,80 +110,9 @@ app.get('/:linkId', (req, res) => {
     }
 });
 
+// Porta do servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
+    console.log('Servidor está rodando e pronto para receber solicitações');
 });
-=======
-const fs = require('fs');
-
-const SECRET_KEY = 'nadadehacker'; // Chave secreta
-
-module.exports = (req, res) => {
-    if (req.method === 'POST') {
-        return handleShortenUrl(req, res);
-    } else if (req.method === 'GET') {
-        return handleGetOriginalUrl(req, res);
-    } else {
-        res.setHeader('Allow', ['GET', 'POST']);
-        return res.status(405).end(`Method ${req.method} Not Allowed`);
-    }
-};
-
-// Handler para encurtar URLs
-function handleShortenUrl(req, res) {
-    const { secret, url } = req.query;
-
-    // Verificação da chave secreta
-    if (secret !== SECRET_KEY) {
-        return res.status(403).json({ error: 'Chave secreta incorreta!' });
-    }
-
-    if (!url) {
-        return res.status(400).json({ error: 'URL não fornecida!' });
-    }
-
-    const urlId = generateId(); // Função para gerar ID único
-    const shortUrl = `moz-encurta-by-doso.vercel.app/${urlId}`;
-
-    // Ler o arquivo JSON existente
-    let urls = {};
-    try {
-        urls = JSON.parse(fs.readFileSync('urls.json', 'utf8'));
-    } catch (error) {
-        console.error('Erro ao ler o arquivo JSON:', error);
-    }
-
-    // Adicionar a nova URL encurtada
-    urls[urlId] = url;
-    
-    // Salvar o arquivo JSON atualizado
-    fs.writeFileSync('urls.json', JSON.stringify(urls, null, 2));
-
-    return res.status(200).json({ shortUrl });
-}
-
-// Handler para obter URLs originais
-function handleGetOriginalUrl(req, res) {
-    const { id } = req.query;
-
-    // Ler o arquivo JSON para encontrar a URL original
-    let urls = {};
-    try {
-        urls = JSON.parse(fs.readFileSync('urls.json', 'utf8'));
-    } catch (error) {
-        console.error('Erro ao ler o arquivo JSON:', error);
-    }
-
-    const originalUrl = urls[id];
-
-    if (originalUrl) {
-        return res.status(200).json({ originalUrl });
-    } else {
-        return res.status(404).json({ error: 'URL não encontrada!' });
-    }
-}
-
-function generateId() {
-    return Math.random().toString(36).substr(2, 8);
-}
