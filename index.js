@@ -14,7 +14,7 @@ const linksFilePath = path.join(__dirname, process.env.LINKS_FILE || 'links.json
 // Middleware para verificar a chave de encurtamento
 const verifyKey = (req, res, next) => {
     const { key } = req.body;
-    if (key !== process.env.ENCODING_KEY) {
+    if (key !== "mozencurtanet") {
         return res.status(403).send('Unauthorized');
     }
     next();

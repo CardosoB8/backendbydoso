@@ -7,7 +7,7 @@
     <meta name="google-adsense-account" content="ca-pub-6411684716871403">
     <title>Encurtador de URL</title>
     <style>
-        /* Seu estilo CSS permanece o mesmo */
+        /* Seu CSS aqui */
         body {
             margin: -20px 20px -20px 20px;
             padding: 10px 50px 10px 50px;
@@ -172,20 +172,19 @@
     </div>
 
     <script>
+        const baseUrl = 'https://backendbydoso.vercel.app'; // Definindo a base URL
+
         function encurtarURL() {
             const secret = document.getElementById('secret').value;
             const url = document.getElementById('url').value;
             const resultElement = document.getElementById('result');
 
-            fetch('/shorten', {
+            fetch(`${baseUrl}/shorten`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    key: secret,
-                    originalUrl: url
-                })
+                body: JSON.stringify({ originalUrl: url, key: secret })
             })
             .then(response => response.json())
             .then(data => {
