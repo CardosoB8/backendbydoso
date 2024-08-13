@@ -136,12 +136,12 @@
     </div>
 
     <script>
-        
+        // Simula o tempo de processamento de 5 segundos antes de avançar para a próxima página
         setTimeout(() => {
             const urlParams = new URLSearchParams(window.location.search);
             const urlId = urlParams.get('id');
             window.location.href = `termos.html?id=${urlId}`;
-        }, 10000);
+        }, 15000);
     </script>
 </body>
 
