@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -188,4 +187,3 @@ function handleGetOriginalUrl(req, res) {
 function generateId() {
     return Math.random().toString(36).substr(2, 8);
 }
->>>>>>> c569ffd (Initial commit)
