@@ -70,7 +70,6 @@ app.get('/get-long-url', (req, res) => {
 app.post('/encurtar', (req, res) => {
     const { url, secretKey } = req.body;
 
-    // Verifica se a senha secreta está correta
     if (secretKey !== SECRET_KEY) {
         return res.status(401).send('Senha secreta incorreta.');
     }
@@ -82,16 +81,27 @@ app.post('/encurtar', (req, res) => {
     const id = generateId();
     const shortUrl = `https://encurtadordelinksmoz.vercel.app/verificar?id=${id}`;
 
-    // Salva o URL encurtado em um arquivo JSON
     const urlsFile = path.join(__dirname, 'urls.json');
     let urls = {};
-    if (fs.existsSync(urlsFile)) {
-        const fileContent = fs.readFileSync(urlsFile, 'utf8');
-        urls = fileContent ? JSON.parse(fileContent) : {};
+
+    try {
+        if (fs.existsSync(urlsFile)) {
+            const fileContent = fs.readFileSync(urlsFile, 'utf8');
+            urls = fileContent ? JSON.parse(fileContent) : {};
+        }
+    } catch (error) {
+        console.error('Erro ao ler o arquivo de URLs:', error);
+        return res.status(500).send('Erro ao ler o arquivo de URLs.');
     }
 
     urls[id] = url;
-    fs.writeFileSync(urlsFile, JSON.stringify(urls, null, 2));
+
+    try {
+        fs.writeFileSync(urlsFile, JSON.stringify(urls, null, 2));
+    } catch (error) {
+        console.error('Erro ao escrever o arquivo de URLs:', error);
+        return res.status(500).send('Erro ao salvar a URL.');
+    }
 
     res.send(`URL encurtado: <a href="${shortUrl}">${shortUrl}</a>`);
 });
