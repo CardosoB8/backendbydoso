@@ -80,7 +80,7 @@ app.post('/encurtar', (req, res) => {
     }
 
     const id = generateId();
-    const shortUrl = `http://localhost:3000/verificar?id=${id}`;
+    const shortUrl = `https://encurtadordelinksmoz.vercel.app/verificar?id=${id}`;
 
     // Salva o URL encurtado em um arquivo JSON
     const urlsFile = path.join(__dirname, 'urls.json');
@@ -97,5 +97,5 @@ app.post('/encurtar', (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Servidor rodando em http://localhost:${port}`);
+    console.log(`Servidor rodando na porta:${port}`);
 });
