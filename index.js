@@ -2,11 +2,14 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const bodyParser = require('body-parser');
-const app = express();
-const port = 3000;
+require('dotenv').config(); // Carregar variáveis do .env
 
-// Configuração da senha secreta
-const SECRET_KEY = 'CardosoFernandoCarlos';
+const app = express();
+
+// Configuração das variáveis de ambiente
+const PORT = process.env.PORT || 3000;
+const SECRET_KEY = process.env.SECRET_KEY;
+const LINKS_FILE = process.env.LINKS_FILE || 'urls.json';
 
 // Middleware
 app.use(bodyParser.json());
@@ -24,32 +27,28 @@ function generateId(length = 8) {
 
 // Página de Verificação
 app.get('/verificar', (req, res) => {
-    const id = req.query.id;
     res.sendFile(path.join(__dirname, 'public', 'verificar.html'));
 });
 
 // Página de Contagem Regressiva
 app.get('/contar', (req, res) => {
-    const id = req.query.id;
     res.sendFile(path.join(__dirname, 'public', 'contar.html'));
 });
 
 // Página de Captcha
 app.get('/captcha', (req, res) => {
-    const id = req.query.id;
     res.sendFile(path.join(__dirname, 'public', 'captcha.html'));
 });
 
 // Página de Download
 app.get('/download', (req, res) => {
-    const id = req.query.id;
     res.sendFile(path.join(__dirname, 'public', 'download.html'));
 });
 
 // Rota para obter o longo URL
 app.get('/get-long-url', (req, res) => {
     const id = req.query.id;
-    const urlsFile = path.join(__dirname, 'urls.json');
+    const urlsFile = path.join(__dirname, LINKS_FILE);
 
     if (fs.existsSync(urlsFile)) {
         const fileContent = fs.readFileSync(urlsFile, 'utf8');
@@ -81,9 +80,8 @@ app.post('/encurtar', (req, res) => {
     const id = generateId();
     const shortUrl = `https://encurtadordelinksmoz.vercel.app/verificar?id=${id}`;
 
-    const urlsFile = path.join(__dirname, 'urls.json');
+    const urlsFile = path.join(__dirname, LINKS_FILE);
     let urls = {};
-
     try {
         if (fs.existsSync(urlsFile)) {
             const fileContent = fs.readFileSync(urlsFile, 'utf8');
@@ -106,6 +104,6 @@ app.post('/encurtar', (req, res) => {
     res.send(`URL encurtado: <a href="${shortUrl}">${shortUrl}</a>`);
 });
 
-app.listen(port, () => {
-    console.log(`Servidor rodando na porta:${port}`);
+app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
 });
