@@ -1,15 +1,22 @@
 const express = require('express');
-const fs = require('fs');
 const path = require('path');
 const bodyParser = require('body-parser');
-require('dotenv').config(); // Carregar variáveis do .env
+const admin = require('firebase-admin');
+require('dotenv').config();
 
+// Inicialize o Firebase Admin SDK
+const serviceAccount = require('./serviceAccountKey.json');
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: process.env.FIREBASE_DATABASE_URL
+});
+
+const db = admin.database();
 const app = express();
 
 // Configuração das variáveis de ambiente
 const PORT = process.env.PORT || 3000;
 const SECRET_KEY = process.env.SECRET_KEY;
-const LINKS_FILE = process.env.LINKS_FILE || 'urls.json';
 
 // Middleware
 app.use(bodyParser.json());
@@ -46,27 +53,26 @@ app.get('/download', (req, res) => {
 });
 
 // Rota para obter o longo URL
-app.get('/get-long-url', (req, res) => {
+app.get('/get-long-url', async (req, res) => {
     const id = req.query.id;
-    const urlsFile = path.join(__dirname, LINKS_FILE);
 
-    if (fs.existsSync(urlsFile)) {
-        const fileContent = fs.readFileSync(urlsFile, 'utf8');
-        const urls = fileContent ? JSON.parse(fileContent) : {};
-        const longUrl = urls[id];
+    try {
+        const snapshot = await db.ref('urls/' + id).once('value');
+        const longUrl = snapshot.val();
 
         if (longUrl) {
             res.send(longUrl);
         } else {
             res.status(404).send('URL não encontrada.');
         }
-    } else {
-        res.status(404).send('Arquivo de URLs não encontrado.');
+    } catch (error) {
+        console.error('Erro ao acessar o Firebase:', error);
+        res.status(500).send('Erro ao acessar o banco de dados.');
     }
 });
 
 // Rota para encurtar URLs
-app.post('/encurtar', (req, res) => {
+app.post('/encurtar', async (req, res) => {
     const { url, secretKey } = req.body;
 
     if (secretKey !== SECRET_KEY) {
@@ -80,28 +86,13 @@ app.post('/encurtar', (req, res) => {
     const id = generateId();
     const shortUrl = `https://encurtadordelinksmoz.vercel.app/verificar?id=${id}`;
 
-    const urlsFile = path.join(__dirname, LINKS_FILE);
-    let urls = {};
     try {
-        if (fs.existsSync(urlsFile)) {
-            const fileContent = fs.readFileSync(urlsFile, 'utf8');
-            urls = fileContent ? JSON.parse(fileContent) : {};
-        }
+        await db.ref('urls/' + id).set(url);
+        res.send(`URL encurtado: <a href="${shortUrl}">${shortUrl}</a>`);
     } catch (error) {
-        console.error('Erro ao ler o arquivo de URLs:', error);
-        return res.status(500).send('Erro ao ler o arquivo de URLs.');
+        console.error('Erro ao salvar no Firebase:', error);
+        res.status(500).send('Erro ao salvar a URL.');
     }
-
-    urls[id] = url;
-
-    try {
-        fs.writeFileSync(urlsFile, JSON.stringify(urls, null, 2));
-    } catch (error) {
-        console.error('Erro ao escrever o arquivo de URLs:', error);
-        return res.status(500).send('Erro ao salvar a URL.');
-    }
-
-    res.send(`URL encurtado: <a href="${shortUrl}">${shortUrl}</a>`);
 });
 
 app.listen(PORT, () => {
