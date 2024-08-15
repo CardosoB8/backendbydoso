@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-adsense-account" content="ca-pub-6411684716871403">
-    <title>mozencurta</title>
+    <title>Preparação de link moz</title>
     <style>
         body {
             margin: -20px 20px -20px 20px;
@@ -123,7 +123,7 @@
 
 <body>
     <div class="header">
-        <div class="title">Encurtador feito por doso</div>
+        <div class="title">Encurtador de link Moz</div>
     </div>
 
     <div class="countdown-container">
@@ -150,9 +150,16 @@
         }, 1000);
 
         function nextPage() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const urlId = urlParams.get('id');
-            window.location.href = `captcha.html?id=${urlId}`;
+           const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+
+
+        if (id) {
+            window.location.href = `/captcha?id=${id}`;
+        } else {
+            document.body.innerHTML = '<p>Erro: ID não encontrado na URL.</p>';
+        }
+                  
         }
     </script>
 </body>

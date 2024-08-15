@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verificação - CAPTCHA</title>
+    <meta name="google-adsense-account" content="ca-pub-6411684716871403">
+    <title>Verificação - CAPTCHA Moz</title>
     <style>
         body {
             margin: -20px 20px -20px 20px;
-            padding: 10px 50px 10px 50px;
+            padding: 10px 60px 10px 60px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -139,7 +140,7 @@
 </head>
 <body>
     <div class="header">
-        <div class="title">Encurtador feito por doso</div>
+        <div class="title">Moz Encurta link</div>
     </div>
 
     <div class="captcha-container">
@@ -158,9 +159,15 @@
         function verifyCaptcha() {
             const answer = document.getElementById('captchaInput').value;
             if (answer.trim().toLowerCase() === 'aimmisterdoso') {
-                const urlParams = new URLSearchParams(window.location.search);
-                const urlId = urlParams.get('id');
-                window.location.href = `download.html?id=${urlId}`;
+                const params = new URLSearchParams(window.location.search);
+                const id = params.get('id');
+
+              
+                if (id) {
+                    window.location.href = `/download?id=${id}`;
+                } else {
+                    document.body.innerHTML = '<p>Erro: ID não encontrado na URL.</p>';
+                }
             } else {
                 alert('Resposta incorreta. Tente novamente.');
             }

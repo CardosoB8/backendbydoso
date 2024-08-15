@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-adsense-account" content="ca-pub-6411684716871403">
-    <title>Verificação de Link</title>
+    <title>Verificação Encurta Moz</title>
     <style>
         body {
             margin: -20px 20px -20px 20px;
@@ -132,16 +132,21 @@
 
     <div class="social-buttons">
         <a href="https://youtube.com/@sketchwarepromoz?si=TspY1aRptoBJ3woS" target="_blank" class="social-button youtube">YouTube</a>
-        <a href="https://wa.me/+258865446574?text= kmk doso" target="_blank" class="social-button whatsapp">WhatsApp</a>
+        <a href="https://wa.me/+258865446574?text=kmk doso" target="_blank" class="social-button whatsapp">WhatsApp</a>
     </div>
 
     <script>
-        // Simula o tempo de processamento de 5 segundos antes de avançar para a próxima página
-        setTimeout(() => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const urlId = urlParams.get('id');
-            window.location.href = `contar.html?id=${urlId}`;
-        }, 15000);
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+
+        
+        if (id) {
+            setTimeout(() => {
+                window.location.href = `/contar?id=${id}`;
+            }, 15000); // 15000 milissegundos = 15 segundos
+        } else {
+            document.body.innerHTML = '<p>Erro: ID não encontrado na URL.</p>';
+        }
     </script>
 </body>
 

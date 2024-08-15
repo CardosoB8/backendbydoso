@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-adsense-account" content="ca-pub-6411684716871403">
-    <title>mozencurta</title>
+    <title>Download Moz</title>
     <style>
         body {
             margin: -20px 20px -20px 20px;
@@ -132,33 +132,45 @@
 
 <body>
     <div class="header">
-        <div class="title">Encurtador feito por doso</div>
+        <div class="title">Moz Encurta link</div>
     </div>
 
     <div class="countdown-container">
-        <h1>Link pronto para download
-        
-        </h1>
-        <p>Verifição concluida</p>
+        <h1>Link pronto para download</h1>
+        <p>Verificação concluída</p>
         <button onclick="redirectToOriginal()">Acessar Conteúdo do link</button>
     </div>
 
     <div class="social-buttons">
         <a href="https://youtube.com/@sketchwarepromoz?si=TspY1aRptoBJ3woS" target="_blank" class="social-button youtube">YouTube</a>
-        <a href="https://wa.me/+258865446574?text= kmk doso" target="_blank" class="social-button whatsapp">WhatsApp</a>
+        <a href="https://wa.me/+258865446574?text=kmk doso" target="_blank" class="social-button whatsapp">WhatsApp</a>
     </div>
 
     <script>
         function redirectToOriginal() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const urlId = urlParams.get('id');
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
 
-            // Chamada ao backend para obter a URL original
-            fetch(`/getOriginalUrl?id=${urlId}`)
-                .then(response => response.json())
-                .then(data => {
-                    window.location.href = data.originalUrl;
-                });
+            if (id) {
+               
+                fetch(`/get-long-url?id=${id}`)
+                    .then(response => {
+                        if (response.ok) {
+                            return response.text();
+                        } else {
+                            throw new Error('URL não encontrada.');
+                        }
+                    })
+                    .then(longUrl => {
+                        
+                        window.location.href = longUrl;
+                    })
+                    .catch(error => {
+                        document.body.innerHTML = `<p>Erro: ${error.message}</p>`;
+                    });
+            } else {
+                document.body.innerHTML = '<p>Erro: ID não encontrado na URL.</p>';
+            }
         }
     </script>
 </body>
