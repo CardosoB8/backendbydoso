@@ -29,85 +29,116 @@ const app = express();
 
 // Configuração das variáveis de ambiente
 const PORT = process.env.PORT || 3000;
-const SECRET_KEY = process.env.SECRET_KEY;
 
 // Middleware
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Função para gerar um ID único
-function generateId(length = 8) {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    for (let i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * characters.length));
-    }
-    return result;
+function generateId(length = 6) {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
 }
 
+// Página Inicial (Index como "home")
+app.get('/home', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // Página de Verificação
-app.get('/verificar', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'verificar.html'));
+app.get('/net', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'net.html'));
 });
 
 // Página de Contagem Regressiva
-app.get('/contar', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'contar.html'));
+app.get('/c', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'c.html'));
 });
 
 // Página de Captcha
-app.get('/captcha', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'captcha.html'));
+app.get('/ca', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'ca.html'));
 });
 
 // Página de Download
-app.get('/download', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'download.html'));
+app.get('/d', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'd.html'));
+});
+
+// Página de FAQ
+app.get('/faq', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'faq.html'));
+});
+
+// Página de Política de Privacidade
+app.get('/politicas', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'politicas.html'));
+});
+
+// Página de Termos de Uso
+app.get('/termos', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'termos.html'));
+});
+
+// Página de Short
+app.get('/short', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'short.html'));
 });
 
 // Rota para obter o longo URL
 app.get('/get-long-url', async (req, res) => {
-    const id = req.query.id;
+  const id = req.query.id;
 
-    try {
-        const snapshot = await db.ref('urls/' + id).once('value');
-        const longUrl = snapshot.val();
+  try {
+    const snapshot = await db.ref('urls/' + id).once('value');
+    const longUrl = snapshot.val();
 
-        if (longUrl) {
-            res.send(longUrl);
-        } else {
-            res.status(404).send('URL não encontrada.');
-        }
-    } catch (error) {
-        console.error('Erro ao acessar o Firebase:', error);
-        res.status(500).send('Erro ao acessar o banco de dados.');
+    if (longUrl) {
+      res.send(longUrl);
+    } else {
+      res.status(404).send('URL não encontrada.');
     }
+  } catch (error) {
+    console.error('Erro ao acessar o Firebase:', error);
+    res.status(500).send('Erro ao acessar o banco de dados.');
+  }
 });
 
 // Rota para encurtar URLs
 app.post('/encurtar', async (req, res) => {
-    const { url, secretKey } = req.body;
+  const { url } = req.body;
 
-    if (secretKey !== SECRET_KEY) {
-        return res.status(401).send('Senha secreta incorreta.');
-    }
+  if (!url) {
+    return res.status(400).send('URL é obrigatória.');
+  }
 
-    if (!url) {
-        return res.status(400).send('URL é obrigatória.');
-    }
+  const id = generateId();
+  const shortUrl = `https://mznet.vercel.app/net?id=${id}`;
 
-    const id = generateId();
-    const shortUrl = `https://encurtadordelinksmoz.vercel.app/verificar?id=${id}`;
+  try {
+    await db.ref('urls/' + id).set(url);
+    res.send(shortUrl); // Envia apenas a URL encurtada
+  } catch (error) {
+    console.error('Erro ao salvar no Firebase:', error);
+    res.status(500).send('Erro ao salvar a URL.');
+  }
+});
 
-    try {
-        await db.ref('urls/' + id).set(url);
-        res.send(`URL encurtado: <a href="${shortUrl}">${shortUrl}</a>`);
-    } catch (error) {
-        console.error('Erro ao salvar no Firebase:', error);
-        res.status(500).send('Erro ao salvar a URL.');
-    }
+// Middleware para rotas não encontradas (404)
+app.use((req, res, next) => {
+  res.status(404).sendFile(path.join(__dirname, 'public', 'error.html'));
+});
+
+// Middleware de tratamento de erros
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).sendFile(path.join(__dirname, 'public', 'error.html'));
 });
 
 app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
+  console.log(`Servidor rodando na porta ${PORT}`);
 });

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificação</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            text-align: center;
+        }
+        .container {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 600px;
+            width: 80%;
+            position: relative;
+        }
+        h1 {
+            margin-bottom: 20px;
+            color: #007bff;
+        }
+        p {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .countdown {
+            font-size: 24px;
+            color: #007bff;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        /* Estilos da animação de processamento */
+        .loader {
+            border: 8px solid #f4f4f4;
+            border-top: 8px solid #007bff;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+    <script>
+        let countdown = 15; // Tempo em segundos
+
+        function updateCountdown() {
+            const countdownElement = document.getElementById('countdown');
+            countdownElement.textContent = countdown;
+            
+            if (countdown <= 0) {
+                const params = new URLSearchParams(window.location.search);
+                const id = params.get('id');
+
+                if (id) {
+                    window.location.href = `/c?id=${id}`;
+                } else {
+                    document.body.innerHTML = '<p style="color: red;">Erro: ID não encontrado na URL.</p>';
+                }
+            } else {
+                countdown--;
+                setTimeout(updateCountdown, 1000);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCountdown();
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="loader"></div>
+        <h1>Verificação</h1>
+        <p>Aguarde <span id="countdown" class="countdown">15</span> segundos para ser redirecionado à próxima página.</p>
+    </div>
+
+    <div class="footer">
+        <p><a href="/home">Voltar para a Página Principal</a></p>
+    </div>
+</body>
+</html>

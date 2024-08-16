@@ -167,7 +167,7 @@
             URLs e facilitar o compartilhamento.</p>
         <img src="bem.png" alt="Imagem de Encurtamento de Links" class="feature-image">
         <p>Clique no botão abaixo para começar a usar o encurtador de links:</p>
-        <a href="/short">
+        <a href="/net">
             <button>Começar</button>
         </a>
     </div>
