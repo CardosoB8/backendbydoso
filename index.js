@@ -1,144 +1,157 @@
-const express = require('express');
-const path = require('path');
-const bodyParser = require('body-parser');
-const admin = require('firebase-admin');
 require('dotenv').config();
+const express = require('express');
+const admin = require('firebase-admin');
+const session = require('express-session');
+const fs = require('fs');
+const path = require('path');
 
-// Inicialize o Firebase Admin SDK com variáveis de ambiente
-const serviceAccount = {
-  type: process.env.FIREBASE_TYPE,
-  project_id: process.env.FIREBASE_PROJECT_ID,
-  private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
-  private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-  client_email: process.env.FIREBASE_CLIENT_EMAIL,
-  client_id: process.env.FIREBASE_CLIENT_ID,
-  auth_uri: process.env.FIREBASE_AUTH_URI,
-  token_uri: process.env.FIREBASE_TOKEN_URI,
-  auth_provider_x509_cert_url: process.env.FIREBASE_AUTH_PROVIDER_CERT_URL,
-  client_x509_cert_url: process.env.FIREBASE_CLIENT_CERT_URL,
-  universe_domain: process.env.FIREBASE_UNIVERSE_DOMAIN
+const app = express();
+app.disable('x-powered-by');
+const PORT = process.env.PORT || 3000;
+
+// Configuração do Firebase
+const firebaseConfig = {
+    type: process.env.FIREBASE_TYPE,
+    project_id: process.env.FIREBASE_PROJECT_ID,
+    private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+    private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    client_email: process.env.FIREBASE_CLIENT_EMAIL,
+    client_id: process.env.FIREBASE_CLIENT_ID,
+    auth_uri: process.env.FIREBASE_AUTH_URI,
+    token_uri: process.env.FIREBASE_TOKEN_URI,
+    auth_provider_x509_cert_url: process.env.FIREBASE_AUTH_PROVIDER_CERT_URL,
+    client_x509_cert_url: process.env.FIREBASE_CLIENT_CERT_URL,
 };
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: process.env.FIREBASE_DATABASE_URL
+    credential: admin.credential.cert(firebaseConfig),
+    databaseURL: process.env.FIREBASE_DATABASE_URL,
 });
 
-const db = admin.database();
-const app = express();
+// Configuração das Sessões
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'dosoaprendizmoztudonet',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { maxAge: 600000 }  // 10 minutos
+}));
 
-// Configuração das variáveis de ambiente
-const PORT = process.env.PORT || 3000;
+// Middlewares
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.static('public'));  // Serve arquivos estáticos
 
-// Middleware
-app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Função para gerar um ID único
-function generateId(length = 6) {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
-}
-
-// Página Inicial (Index como "home")
-app.get('/home', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// Rota para a raiz da aplicação
+app.get('/', (req, res) => {
+    res.redirect('/shorten');
 });
 
-// Página de Verificação
-app.get('/net', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'net.html'));
+// Página para encurtar links
+app.get('/shorten', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'shorten.html'));
 });
 
-// Página de Contagem Regressiva
-app.get('/c', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'c.html'));
-});
+// Endpoint para encurtar e armazenar link
+app.post('/shorten', async (req, res) => {
+    const originalUrl = req.body.url;
+    const customAlias = req.body.alias || Math.random().toString(36).substring(2, 8);
+    const db = admin.database();
+    const ref = db.ref(`links/${customAlias}`);
 
-// Página de Captcha
-app.get('/ca', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'ca.html'));
-});
-
-// Página de Download
-app.get('/d', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'd.html'));
-});
-
-// Página de FAQ
-app.get('/faq', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'faq.html'));
-});
-
-// Página de Política de Privacidade
-app.get('/politicas', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'politicas.html'));
-});
-
-// Página de Termos de Uso
-app.get('/termos', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'termos.html'));
-});
-
-// Página de Short
-app.get('/short', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'short.html'));
-});
-
-// Rota para obter o longo URL
-app.get('/get-long-url', async (req, res) => {
-  const id = req.query.id;
-
-  try {
-    const snapshot = await db.ref('urls/' + id).once('value');
-    const longUrl = snapshot.val();
-
-    if (longUrl) {
-      res.send(longUrl);
-    } else {
-      res.status(404).send('URL não encontrada.');
+    try {
+        const snapshot = await ref.once('value');
+        if (snapshot.exists()) {
+            res.redirect(`/response.html?status=error&message=${encodeURIComponent('Alias já está em uso. Tente outro.')}`);
+        } else {
+            await ref.set({ originalUrl, createdAt: Date.now() });
+            res.redirect(`/response.html?status=success&message=${encodeURIComponent(`/ver/${customAlias}`)}`);
+        }
+    } catch (error) {
+        console.error('Erro ao encurtar o link:', error);
+        res.redirect(`/response.html?status=error&message=${encodeURIComponent('Erro ao encurtar o link.')}`);
     }
-  } catch (error) {
-    console.error('Erro ao acessar o Firebase:', error);
-    res.status(500).send('Erro ao acessar o banco de dados.');
-  }
 });
 
-// Rota para encurtar URLs
-app.post('/encurtar', async (req, res) => {
-  const { url } = req.body;
 
-  if (!url) {
-    return res.status(400).send('URL é obrigatória.');
-  }
+// Rota para fornecer dados dos anúncios a partir de um arquivo JSON
+app.get('/api/ads', (req, res) => {
+    const adsFilePath = path.join(__dirname, 'public', 'ads', 'ads.json');
+    fs.readFile(adsFilePath, 'utf8', (err, data) => {
+        if (err) {
+            console.error('Erro ao ler o arquivo de anúncios:', err);
+            return res.status(500).json({ error: 'Erro ao carregar anúncios' });
+        }
 
-  const id = generateId();
-  const shortUrl = `https://mznet.vercel.app/net?id=${id}`;
+        try {
+            const ads = JSON.parse(data);
+            if (ads.length === 0) {
+                return res.status(404).json({ error: 'Nenhum anúncio encontrado' });
+            }
 
-  try {
-    await db.ref('urls/' + id).set(url);
-    res.send(shortUrl); // Envia apenas a URL encurtada
-  } catch (error) {
-    console.error('Erro ao salvar no Firebase:', error);
-    res.status(500).send('Erro ao salvar a URL.');
-  }
+            // Escolher um anúncio aleatório do arquivo JSON
+            const randomAd = ads[Math.floor(Math.random() * ads.length)];
+            const imageUrl = `/ads/${randomAd.image}`;  // Caminho para acessar a imagem
+            const adLink = randomAd.url;  // URL associado à imagem
+
+            res.json({ image: imageUrl, url: adLink });
+        } catch (parseError) {
+            console.error('Erro ao analisar o arquivo JSON:', parseError);
+            res.status(500).json({ error: 'Erro ao processar anúncios' });
+        }
+    });
 });
 
-// Middleware para rotas não encontradas (404)
-app.use((req, res, next) => {
-  res.status(404).sendFile(path.join(__dirname, 'public', 'error.html'));
+
+// Função para verificar o passo da verificação
+const checkVerificationStep = (requiredStep) => (req, res, next) => {
+    if (req.session.verifyStep === requiredStep) {
+        next();
+    } else {
+        res.redirect(`/response.html?status=error&message=${encodeURIComponent('Acesso negado. Complete a verificação na página anterior.')}`);
+    }
+};
+
+
+// Página de verificação 1
+app.get('/ver/:alias', (req, res) => {
+    req.session.verifyStep = 1;
+    res.sendFile(path.join(__dirname, 'public', 'ver.html'));
 });
 
-// Middleware de tratamento de erros
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).sendFile(path.join(__dirname, 'public', 'error.html'));
+// Página de verificação 2
+app.get('/veri/:alias', checkVerificationStep(1), (req, res) => {
+    req.session.verifyStep = 2;
+    res.sendFile(path.join(__dirname, 'public', 'veri.html'));
 });
 
+// Página de verificação 3
+app.get('/verif/:alias', checkVerificationStep(2), (req, res) => {
+    req.session.verifyStep = 3;
+    res.sendFile(path.join(__dirname, 'public', 'verif.html'));
+});
+
+// Endpoint para redirecionar após a verificação
+app.get('/redirect/:alias', checkVerificationStep(3), async (req, res) => {
+    const alias = req.params.alias;
+    const db = admin.database();
+    const ref = db.ref(`links/${alias}`);
+
+    try {
+        const snapshot = await ref.once('value');
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            req.session.destroy();  // Limpa a sessão após a verificação
+            res.redirect(data.originalUrl);
+        } else {
+            res.status(404).send('Link não encontrado!');
+        }
+    } catch (error) {
+        console.error('Erro ao redirecionar:', error);
+        res.status(500).send('Erro ao redirecionar.');
+    }
+});
+
+// Iniciar o servidor
 app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+    console.log(`Servidor rodando na porta ${PORT}`);
 });

@@ -1,0 +1,14 @@
+[
+  {
+    "image": "ads1.png",
+    "url": "https://example.com/ads1"
+  },
+  {
+    "image": "ads2.png",
+    "url": "https://example.com/ads2"
+  },
+  {
+    "image": "ads3.png",
+    "url": "https://example.com/ads3"
+  }
+]
